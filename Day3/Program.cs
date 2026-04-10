@@ -54,7 +54,7 @@ class Program
         Console.Write("英语:");
         var english = Convert.ToDouble(Console.ReadLine() ?? "");
         
-        var stu = new Student()
+        var stu = new Student
         {
             Name = name,
             Gender = gender,
