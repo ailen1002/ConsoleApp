@@ -7,9 +7,9 @@ internal abstract class ContractBook
     private static readonly List<string> Contacts = [];
     private const string DataFile = "contacts.txt";
 
-    private static void Main()
+    private static async Task Main()
     {
-        LoadFromFile();
+        await LoadFromFile();
         
         while (true)
         {
@@ -33,7 +33,7 @@ internal abstract class ContractBook
                         FindContactByIndex();
                         break;
                     case 4:
-                        SaveToFile();
+                        await SaveToFile();
                         Console.WriteLine("已保存, 退出程序!");
                         return;
                     default:
@@ -100,24 +100,27 @@ internal abstract class ContractBook
         }
     }
 
-    private static void SaveToFile()
+    private static async Task SaveToFile()
     {
-        using var sw = new StreamWriter(DataFile);
+        await using var sw = new StreamWriter(DataFile);
         foreach (var name in Contacts)
-            sw.WriteLine(name);
+            await sw.WriteLineAsync(name);
     }
 
-    private static void LoadFromFile()
+    private static async Task LoadFromFile()
     {
+        if (!File.Exists(DataFile))
+        {
+            Console.WriteLine("暂无本地数据!");
+            return;
+        }
+
         try
         {
-            if(!File.Exists(DataFile))
-                return;
-            
             Contacts.Clear();
 
             using var sr = new StreamReader(DataFile);
-            while (sr.ReadLine() is { } line)
+            while (await sr.ReadLineAsync() is { } line)
             {
                 Contacts.Add(line);
             }
