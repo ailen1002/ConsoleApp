@@ -5,9 +5,12 @@ namespace Day11;
 internal abstract class ContractBook
 {
     private static readonly List<string> Contacts = [];
+    private const string DataFile = "contacts.txt";
 
     private static void Main()
     {
+        LoadFromFile();
+        
         while (true)
         {
             try
@@ -30,7 +33,8 @@ internal abstract class ContractBook
                         FindContactByIndex();
                         break;
                     case 4:
-                        Console.WriteLine("退出程序!");
+                        SaveToFile();
+                        Console.WriteLine("已保存, 退出程序!");
                         return;
                     default:
                         Console.WriteLine("输入无效, 请选1-4!");
@@ -93,6 +97,35 @@ internal abstract class ContractBook
         catch (Exception)
         {
             Console.WriteLine("未找到联系人!");
+        }
+    }
+
+    private static void SaveToFile()
+    {
+        using var sw = new StreamWriter(DataFile);
+        foreach (var name in Contacts)
+            sw.WriteLine(name);
+    }
+
+    private static void LoadFromFile()
+    {
+        try
+        {
+            if(!File.Exists(DataFile))
+                return;
+            
+            Contacts.Clear();
+
+            using var sr = new StreamReader(DataFile);
+            while (sr.ReadLine() is { } line)
+            {
+                Contacts.Add(line);
+            }
+            Console.WriteLine("数据加载成功!");
+        }
+        catch
+        {
+            Console.WriteLine("数据文件加载失败，新建空列表");
         }
     }
 }
