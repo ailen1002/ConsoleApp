@@ -8,6 +8,8 @@
 //  * ================================================================================
 //  */
 
+using Day11.Strategies;
+
 namespace Day11.Utils;
 
 public class AppConfig
@@ -16,4 +18,6 @@ public class AppConfig
     private AppConfig() { }
     public static string DataFilePath => "contactData.txt";
     public static string AppName => "高级通讯录";
+    public static ISaveStrategy SaveStrategy => new JsonSaveStrategy();
+    // public static ISaveStrategy SaveStrategy => new TextSaveStrategy();
 }

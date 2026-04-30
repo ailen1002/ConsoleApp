@@ -10,10 +10,12 @@
 
 using Day11.Factories;
 using Day11.Models;
+using Day11.Strategies;
+using Day11.Utils;
 
 namespace Day11.Services;
 
-public class ContactService(FileStorageService fileService)
+public class ContactService(ISaveStrategy saveStrategy)
 {
     private readonly List<Contact> _contacts = [];
 
@@ -38,22 +40,13 @@ public class ContactService(FileStorageService fileService)
 
     public async Task SaveToFileAsync()
     {
-        var lines = _contacts.Select(c => $"{c.Name}|{c.Phone}").ToList();
-        await fileService.SaveAllLineAsync(lines);
+        await saveStrategy.SaveAsync(AppConfig.DataFilePath, _contacts);
     }
 
     public async Task LoadFromFileAsync()
     {
+        var data = await saveStrategy.LoadAsync(AppConfig.DataFilePath);
         _contacts.Clear();
-        var lines = await fileService.LoadAllLinesAsync();
-
-        foreach (var arr in lines.Select(line => line.Split('|')).Where(arr => arr.Length > 2))
-        {
-            _contacts.Add(new Contact
-            {
-                Name = arr[0],
-                Phone = arr[1]
-            });
-        }
+        _contacts.AddRange(data);
     }
 }

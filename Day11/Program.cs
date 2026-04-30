@@ -1,14 +1,14 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using Day11.Services;
+using Day11.Strategies;
 using Day11.Utils;
 
 namespace Day11;
 
 internal abstract class ContractBook
 {
-    private static readonly FileStorageService FileService = new(AppConfig.DataFilePath);
-    private static readonly ContactService ContactService = new(FileService);
+    private static readonly ContactService ContactService = new(AppConfig.SaveStrategy);
     private static async Task Main()
     {
         await ContactService.LoadFromFileAsync();
@@ -19,7 +19,7 @@ internal abstract class ContractBook
             try
             {
                 Console.WriteLine("\n===== 通讯录菜单 =====");
-                Console.WriteLine("1. 添加联系人; 2. 查看所有联系人; 3. 按索引查找联系人; 4. 退出");
+                Console.WriteLine("1. 添加联系人; 2. 查看所有联系人; 3. 按索姓名查找联系人; 4. 退出");
                 Console.Write("请选择操作: ");
 
                 if (!ConsoleHelper.TryReadNumber(out var choice))
