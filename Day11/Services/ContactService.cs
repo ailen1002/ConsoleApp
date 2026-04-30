@@ -8,19 +8,19 @@
 //  * ================================================================================
 //  */
 
+using Day11.Factories;
 using Day11.Models;
-using Day11.Utils;
 
 namespace Day11.Services;
 
 public class ContactService(FileStorageService fileService)
 {
     private readonly List<Contact> _contacts = [];
-    private readonly FileStorageService _fileService = fileService;
 
     public void AddContact(string name, string phone)
     {
-        _contacts.Add(new Contact { Name = name, Phone = phone });
+        var contact = ContactFactory.CreateContact(name, phone);
+        _contacts.Add(contact);
     }
 
     public List<Contact> GetAllContacts()
