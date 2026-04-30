@@ -7,12 +7,12 @@ namespace Day11;
 
 internal abstract class ContractBook
 {
-    private static readonly FileStorageService FileService = new("contactData.txt");
+    private static readonly FileStorageService FileService = new(AppConfig.DataFilePath);
     private static readonly ContactService ContactService = new(FileService);
     private static async Task Main()
     {
         await ContactService.LoadFromFileAsync();
-        ConsoleHelper.PrintLine("=== 面向对象分层通讯录 启动 ===");
+        AppLogger.Log("程序启动: " + AppConfig.AppName);
         
         while (true)
         {
