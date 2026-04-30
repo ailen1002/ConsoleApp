@@ -1,15 +1,18 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+using Day11.Services;
+using Day11.Utils;
+
 namespace Day11;
 
 internal abstract class ContractBook
 {
-    private static readonly List<string> Contacts = [];
-    private const string DataFile = "contacts.txt";
-
+    private static readonly FileStorageService FileService = new("contactData.txt");
+    private static readonly ContactService ContactService = new(FileService);
     private static async Task Main()
     {
-        await LoadFromFile();
+        await ContactService.LoadFromFileAsync();
+        ConsoleHelper.PrintLine("=== 面向对象分层通讯录 启动 ===");
         
         while (true)
         {
@@ -18,13 +21,17 @@ internal abstract class ContractBook
                 Console.WriteLine("\n===== 通讯录菜单 =====");
                 Console.WriteLine("1. 添加联系人; 2. 查看所有联系人; 3. 按索引查找联系人; 4. 退出");
                 Console.Write("请选择操作: ");
-            
-                var choice = Convert.ToInt16(Console.ReadLine());
+
+                if (!ConsoleHelper.TryReadNumber(out var choice))
+                {
+                    ConsoleHelper.PrintLine("请输入合法数字");
+                    continue;
+                }
             
                 switch (choice)
                 {
                     case 1:
-                        AddContact();
+                        await AddContact();
                         break;
                     case 2:
                         ShowContacts();
@@ -33,7 +40,7 @@ internal abstract class ContractBook
                         FindContactByIndex();
                         break;
                     case 4:
-                        await SaveToFile();
+                        await ContactService.SaveToFileAsync();
                         Console.WriteLine("已保存, 退出程序!");
                         return;
                     default:
@@ -53,82 +60,50 @@ internal abstract class ContractBook
         }
     }
 
-    private static void AddContact()
+    private static async Task AddContact()
     {
         Console.Write("请输入联系人姓名: ");
-        var name = Console.ReadLine();
+        var name = ConsoleHelper.ReadInput();
         
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            Console.Write("姓名不能为空!");
-        }
-        else
-        {
-            Contacts.Add(name);
-            Console.WriteLine("添加成功!");
-        }
+        Console.Write("请输入联系人电话: ");
+        var phone = ConsoleHelper.ReadInput();
+        
+        ContactService.AddContact(name, phone);
+        await ContactService.SaveToFileAsync();
+        ConsoleHelper.PrintLine("添加并自动保存成功");
     }
 
     private static void ShowContacts()
     {
-        if (Contacts.Count == 0)
+        var list = ContactService.GetAllContacts();
+        
+        if (list.Count == 0)
         {
             Console.WriteLine("通讯录为空!");
             return;
         }
 
         Console.WriteLine("\n----- 联系人列表 -----");
-        for (var i = 0; i < Contacts.Count; i++)
+        for (var i = 0; i < list.Count; i++)
         {
-            Console.WriteLine($"{i}：{Contacts[i]}");
+            Console.WriteLine($"{i}: 姓名:{list[i].Name} 电话:{list[i].Phone}");
         }
     }
 
     private static void FindContactByIndex()
     {
-        try
-        {
-            Console.Write("请输入联系人编号: ");
-            var index = Convert.ToInt16(Console.ReadLine());
+        Console.Write("请输入联系人姓名: ");
+        var name = ConsoleHelper.ReadInput();
+
+        var findContact = ContactService.GetByName(name);
         
-            var findName = Contacts[index];
-            Console.WriteLine($"找到联系人: {findName}");
-        }
-        catch (Exception)
+        if (findContact == null)
         {
-            Console.WriteLine("未找到联系人!");
+            ConsoleHelper.PrintLine("未找到该用户!"); 
         }
-    }
-
-    private static async Task SaveToFile()
-    {
-        await using var sw = new StreamWriter(DataFile);
-        foreach (var name in Contacts)
-            await sw.WriteLineAsync(name);
-    }
-
-    private static async Task LoadFromFile()
-    {
-        if (!File.Exists(DataFile))
+        else
         {
-            Console.WriteLine("暂无本地数据!");
-            return;
-        }
-
-        try
-        {
-            Contacts.Clear();
-
-            using var sr = new StreamReader(DataFile);
-            while (await sr.ReadLineAsync() is { } line)
-            {
-                Contacts.Add(line);
-            }
-            Console.WriteLine("数据加载成功!");
-        }
-        catch
-        {
-            Console.WriteLine("数据文件加载失败，新建空列表");
+            Console.WriteLine($"姓名: {findContact.Name} 电话: {findContact.Phone}");
         }
     }
 }
