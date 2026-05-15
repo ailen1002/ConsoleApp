@@ -24,6 +24,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Day11", "Day11\Day11.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModbusMultiApp", "ModbusMultiApp\ModbusMultiApp.csproj", "{E22AA2A5-BFD4-4609-9A87-41F452E03F2A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModbusApp", "ModbusApp\ModbusApp.csproj", "{53D5D9CD-67F6-4C95-A1CE-447DE5DAB4EE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -78,5 +80,9 @@ Global
 		{E22AA2A5-BFD4-4609-9A87-41F452E03F2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E22AA2A5-BFD4-4609-9A87-41F452E03F2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E22AA2A5-BFD4-4609-9A87-41F452E03F2A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{53D5D9CD-67F6-4C95-A1CE-447DE5DAB4EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53D5D9CD-67F6-4C95-A1CE-447DE5DAB4EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53D5D9CD-67F6-4C95-A1CE-447DE5DAB4EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53D5D9CD-67F6-4C95-A1CE-447DE5DAB4EE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
