@@ -98,7 +98,7 @@ class Program
                 {
                     var registers = await master.ReadHoldingRegistersAsync(
                         slaveAddress: 1,
-                        startAddress: 10,
+                        startAddress: 0,
                         numberOfPoints: 10
                     );
 

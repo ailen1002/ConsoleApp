@@ -11,9 +11,4 @@
       <PackageReference Include="NModbus4.NetCore" Version="4.0.0" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Devices\" />
-      <Folder Include="Services\" />
-    </ItemGroup>
-
 </Project>
