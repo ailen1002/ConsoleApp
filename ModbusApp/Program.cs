@@ -1,5 +1,6 @@
 // See https://aka.ms/new-console-template for more information
 
+using ModbusApp.Devices.SwitchInputBoard;
 using ModbusApp.Services.Channel;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
@@ -40,18 +41,17 @@ internal abstract class Program
             Log.Information($"{ch.Name} - {ch.Type}");
         }
 
-        var inputBoard = channels.First(c => c.Name == "数字量输入板").Master;
+        var inputBoard = new SwitchInputBoard(channels);
         var outputBoard = channels.First(c => c.Name == "数字量输出板").Master;
         var sp2 = channels.First(c => c.Name == "COM2").Master;
 
         while (true)
         {
-            var a = await inputBoard.ReadHoldingRegistersAsync(1, 0,10);
+            await inputBoard.RefreshAsync();
             var b = await outputBoard.ReadHoldingRegistersAsync(1, 0,10);
             var c = await sp2.ReadHoldingRegistersAsync(1, 0,10);
             var d = await sp2.ReadHoldingRegistersAsync(2, 0,10);
             
-            Log.Information("a: [{Values}]", string.Join(", ", a));
             Log.Information("b: [{Values}]", string.Join(", ", b));
             Log.Information("c: [{Values}]", string.Join(", ", c));
             Log.Information("d: [{Values}]", string.Join(", ", d));
