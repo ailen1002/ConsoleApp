@@ -1,9 +1,8 @@
-﻿// See https://aka.ms/new-console-template for more information
+// See https://aka.ms/new-console-template for more information
 
-using System.IO.Ports;
-using ModbusApp.Models;
-using ModbusApp.Services;
-using ModbusApp.Slaves;
+using ModbusApp.Services.Channel;
+using Serilog;
+using Serilog.Sinks.SystemConsole.Themes;
 
 namespace ModbusApp;
 
@@ -11,53 +10,57 @@ internal abstract class Program
 {
     private static async Task Main()
     {
-        var hub = new ModbusHub();
-
-        var a = new TcpSlaveInfo()
-        {
-            Name = "数字量输入板",
-            Ip = "192.168.1.105"
-        }; 
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .Enrich.WithThreadId()
+            .Enrich.FromLogContext()
+            .WriteTo.Console(
+                theme: AnsiConsoleTheme.Literate,
+                outputTemplate:
+                "[{Timestamp:HH:mm:ss.fff}] " +
+                "[{Level:u3}] " +
+                "[T:{ThreadId}] " +
+                "{Message:lj}{NewLine}{Exception}")
+            .CreateLogger();
         
-        var b = new TcpSlaveInfo()
+        IReadOnlyList<IModbusChannel> channels;
+        
+        try
         {
-            Name = "数字量输出板",
-            Ip = "192.168.1.151"
-        }; 
+            channels = await ModbusChannelFactory.CreateChannelsAsync();
+        }
+        catch (Exception ex)
+        {
+            Log.Information($"Modbus 初始化失败: {ex.Message}");
+            return;
+        }
+
+        foreach (var ch in channels)
+        {
+            Log.Information($"{ch.Name} - {ch.Type}");
+        }
+
+        var inputBoard = channels.First(c => c.Name == "数字量输入板").Master;
+        var outputBoard = channels.First(c => c.Name == "数字量输出板").Master;
+        var sp2 = channels.First(c => c.Name == "COM2").Master;
+
+        while (true)
+        {
+            var a = await inputBoard.ReadHoldingRegistersAsync(1, 0,10);
+            var b = await outputBoard.ReadHoldingRegistersAsync(1, 0,10);
+            var c = await sp2.ReadHoldingRegistersAsync(1, 0,10);
+            var d = await sp2.ReadHoldingRegistersAsync(2, 0,10);
             
-        hub.Register(new ModbusTcpSlave(a));
-
-        hub.Register(new ModbusTcpSlave(b));
-        
-        var rtuPort = new RtuSlaveInfo
-        {
-            Name = "COM2",
-            PortName = "COM2",
-            BaudRate = 19200,
-            DataBits = 8,
-            Parity = Parity.None,
-            StopBits = StopBits.One,
-            ReadTimeout = 500,
-            WriteTimeout = 500,
-            SlaveId = 1,
-        };
-        
-        hub.Register(new ModbusRtuSlave(rtuPort));
-
-        // 启动轮询
-        _ = new PollingService(hub.Get("数字量输入板")!, 1000).StartAsync();
-        _ = new PollingService(hub.Get("数字量输出板")!, 1000).StartAsync();
-        _ = new PollingService(hub.Get("COM2")!, 500).StartAsync();
-
-        // ✅ 直接拿设备
-        var outputBoard = hub.GetOutputBoard();
-
-        // ✅ 这就是你要的写法
-        await outputBoard.WriteSingleRegisterAsync(2, 999);
-
-        var data = await outputBoard.ReadRegistersAsync(0, 10); 
-        Console.WriteLine(string.Join(", ", data));
-
-        await Task.Delay(Timeout.Infinite);
+            Log.Information("a: [{Values}]", string.Join(", ", a));
+            Log.Information("b: [{Values}]", string.Join(", ", b));
+            Log.Information("c: [{Values}]", string.Join(", ", c));
+            Log.Information("d: [{Values}]", string.Join(", ", d));
+            // Log.Information("a: {@Values}", a);
+            // Log.Information("b: {@Values}", b);
+            // Log.Information("c: {@Values}", c);
+            // Log.Information("d: {@Values}", d);
+            
+            await Task.Delay(1000);
+        }
     }
 }
