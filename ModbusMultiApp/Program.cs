@@ -10,28 +10,48 @@ class Program
 {
     static async Task Main(string[] args)
     {
-        var slaveA = new ModbusSlaveInfo
+        var slaveA = new ModbusTcpSlaveInfo
         {
             Name = "数字量输入板",
             Ip = "192.168.1.105",
             Port = 502,
             SlaveId = 1
         };
-        var slaveB = new ModbusSlaveInfo
+        var slaveB = new ModbusTcpSlaveInfo
         {
             Name = "数字量输出板",
             Ip = "192.168.1.151",
             Port = 502,
             SlaveId = 1
         };
+        var mainController = new ModbusRtuSlaveInfo
+        {
+            Name = "主控制器",
+            PortName = "COM2",
+            BaudRate = 19200,
+            DataBits = 8,
+            Parity = Parity.None,
+            StopBits = StopBits.One,
+            SlaveId = 1
+        };
+        var acVoltmeter = new ModbusRtuSlaveInfo
+        {
+            Name = "交流电压表",
+            PortName = "COM2",
+            BaudRate = 19200,
+            DataBits = 8,
+            Parity = Parity.None,
+            StopBits = StopBits.One,
+            SlaveId = 2
+        };
         var taskA = PollTcpAsync(slaveA);
         var taskB = PollTcpAsync(slaveB);
-        var rtuTask = PollRtuAsync();
+        var rtuTask = PollRtuAsync(mainController,acVoltmeter);
 
         await Task.WhenAll(taskA, taskB, rtuTask);
     }
 
-    static async Task PollTcpAsync(ModbusSlaveInfo slave)
+    static async Task PollTcpAsync(ModbusTcpSlaveInfo slave)
     {
         while (true)
         {
@@ -66,7 +86,7 @@ class Program
         }
     }
     
-    static async Task PollRtuAsync()
+    static async Task PollRtuAsync(ModbusRtuSlaveInfo slave1, ModbusRtuSlaveInfo slave2)
     {
         SerialPort? serialPort = null;
 
@@ -96,13 +116,21 @@ class Program
             {
                 try
                 {
-                    var registers = await master.ReadHoldingRegistersAsync(
-                        slaveAddress: 1,
+                    var registers1 = await master.ReadHoldingRegistersAsync(
+                        slaveAddress: slave1.SlaveId,
                         startAddress: 0,
                         numberOfPoints: 10
                     );
 
-                    PrintRegisters("RTU", "COM2", registers);
+                    PrintRegisters(slave1.PortName, slave1.Name, registers1);
+
+                    var registers2 = await master.ReadHoldingRegistersAsync(
+                        slaveAddress: slave2.SlaveId,
+                        startAddress: 0,
+                        numberOfPoints: 10
+                    );
+                    
+                    PrintRegisters(slave2.PortName, slave2.Name, registers2);
 
                     await Task.Delay(50);
                 }
@@ -125,11 +153,22 @@ class Program
         }
     }
 
-    public class ModbusSlaveInfo
+    public class ModbusTcpSlaveInfo
     {
         public string Name { get; set; } = string.Empty;
         public string Ip { get; set; } = string.Empty;
         public int Port { get; set; }
+        public byte SlaveId { get; set; }
+    }
+    
+    public class ModbusRtuSlaveInfo
+    {
+        public string Name { get; set; } = string.Empty;
+        public string PortName { get; set; } = string.Empty;
+        public int BaudRate { get; set; }
+        public int DataBits { get; set; }
+        public Parity Parity { get; set; }
+        public StopBits StopBits { get; set; }
         public byte SlaveId { get; set; }
     }
     
