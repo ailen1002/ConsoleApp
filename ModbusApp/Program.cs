@@ -24,7 +24,7 @@ internal abstract class Program
                 "{Message:lj}{NewLine}{Exception}")
             .CreateLogger();
         
-        IReadOnlyList<IModbusChannel> channels;
+        IEnumerable<IModbusChannel> channels;
         
         try
         {

@@ -15,8 +15,6 @@ namespace ModbusApp.Devices.SwitchInputBoard;
 
 public class SwitchInputBoard(IEnumerable<IModbusChannel> channels)
 {
-    private ushort[] _inputs = [];
-    
     public ushort Di1 => Get(0);
     public ushort Di2 => Get(1);
     public ushort Di3 => Get(2);
@@ -34,14 +32,16 @@ public class SwitchInputBoard(IEnumerable<IModbusChannel> channels)
     public ushort Di15 => Get(14);
     public ushort Di16 => Get(15);
     
+    private ushort[] _inputs = [];
+    
     private ushort Get(int index)
-        => _inputs.Length > index ? _inputs[index] : (ushort)0;
+        => index >= 0 && index < _inputs.Length ? _inputs[index] : (ushort)0;
     
     public async Task RefreshAsync()
     {
         var inputBoard = channels.First(c => c.Name == "数字量输入板").Master;
         _inputs = await inputBoard.ReadHoldingRegistersAsync(1, 0, 16);
         
-        Log.Information("a: {@Values}", _inputs);
+        Log.Debug("a: {@Values}", _inputs);
     }
 }
