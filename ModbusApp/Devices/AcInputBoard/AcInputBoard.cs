@@ -1,8 +1,8 @@
 ﻿// /*
 //  * ================================================================================
 //  * @Author       : Andrew
-//  * @Date         : 06月11日 15:06
-//  * @FilePath     : D:\works\MFCProject\RiderProjects\ConsoleApp1\ModbusApp\Devices\SwitchInputBoard\SwitchInputBoard.cs
+//  * @Date         : 06月12日 12:06
+//  * @FilePath     : D:\works\MFCProject\RiderProjects\ConsoleApp1\ModbusApp\Devices\AcInputBoard\AcInputBoard.cs
 //  * @Description  :
 //  * @Copyright    : Copyright 2015 zhang xu, All rights reserved.
 //  * ================================================================================
@@ -11,9 +11,9 @@
 using ModbusApp.Services.Channel;
 using Serilog;
 
-namespace ModbusApp.Devices.SwitchInputBoard;
+namespace ModbusApp.Devices.AcInputBoard;
 
-public class SwitchInputBoard(IEnumerable<IModbusChannel> channels)
+public class AcInputBoard(IEnumerable<IModbusChannel> channels)
 {
     public ushort Di1 => Get(0);
     public ushort Di2 => Get(1);
@@ -39,9 +39,9 @@ public class SwitchInputBoard(IEnumerable<IModbusChannel> channels)
     
     public async Task ReadStateAsync()
     {
-        var switchInputBoard = channels.First(c => c.Name == "数字量输入板卡").Master;
-        _inputs = await switchInputBoard.ReadHoldingRegistersAsync(1, 0, 16);
+        var acInputBoard = channels.First(c => c.Name == "继电器检测板卡").Master;
+        _inputs = await acInputBoard.ReadHoldingRegistersAsync(1, 0, 16);
         
-        Log.Debug("数字量输入板卡: {@Values}", _inputs);
+        Log.Debug("继电器检测板卡: {@Values}", _inputs);
     }
 }

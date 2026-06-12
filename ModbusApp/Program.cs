@@ -1,5 +1,6 @@
 // See https://aka.ms/new-console-template for more information
 
+using ModbusApp.Devices.AcInputBoard;
 using ModbusApp.Devices.SwitchInputBoard;
 using ModbusApp.Services.Channel;
 using Serilog;
@@ -13,18 +14,16 @@ internal abstract class Program
     {
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Debug()
-            .Enrich.WithThreadId()
             .Enrich.FromLogContext()
             .WriteTo.Console(
                 theme: AnsiConsoleTheme.Literate,
                 outputTemplate:
                 "[{Timestamp:HH:mm:ss.fff}] " +
                 "[{Level:u3}] " +
-                "[T:{ThreadId}] " +
                 "{Message:lj}{NewLine}{Exception}")
             .CreateLogger();
         
-        IEnumerable<IModbusChannel> channels;
+        IReadOnlyList<IModbusChannel> channels;
         
         try
         {
@@ -36,25 +35,22 @@ internal abstract class Program
             return;
         }
 
-        foreach (var ch in channels)
-        {
-            Log.Information($"{ch.Name} - {ch.Type}");
-        }
-
-        var inputBoard = new SwitchInputBoard(channels);
-        var outputBoard = channels.First(c => c.Name == "数字量输出板").Master;
-        var sp2 = channels.First(c => c.Name == "COM2").Master;
+        var switchInputBoard = new SwitchInputBoard(channels);
+        var acInputClient = new AcInputBoard(channels);
+        //var outputBoard = channels.First(c => c.Name == "数字量输出板卡").Master;
+        //var sp2 = channels.First(c => c.Name == "COM2").Master;
 
         while (true)
         {
-            await inputBoard.ReadStateAsync();
-            var b = await outputBoard.ReadHoldingRegistersAsync(1, 0,10);
-            var c = await sp2.ReadHoldingRegistersAsync(1, 0,10);
-            var d = await sp2.ReadHoldingRegistersAsync(2, 0,10);
+            await switchInputBoard.ReadStateAsync();
+            await acInputClient.ReadStateAsync();
+            //var b = await outputBoard.ReadHoldingRegistersAsync(1, 0,10);
+            //var c = await sp2.ReadHoldingRegistersAsync(1, 0,10);
+            //var d = await sp2.ReadHoldingRegistersAsync(2, 0,10);
             
-            Log.Information("b: [{Values}]", string.Join(", ", b));
-            Log.Information("c: [{Values}]", string.Join(", ", c));
-            Log.Information("d: [{Values}]", string.Join(", ", d));
+            //Log.Information("b: [{Values}]", string.Join(", ", b));
+            //Log.Information("c: [{Values}]", string.Join(", ", c));
+            //Log.Information("d: [{Values}]", string.Join(", ", d));
             // Log.Information("a: {@Values}", a);
             // Log.Information("b: {@Values}", b);
             // Log.Information("c: {@Values}", c);

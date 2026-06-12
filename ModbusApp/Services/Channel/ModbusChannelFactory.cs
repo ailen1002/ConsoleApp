@@ -16,37 +16,43 @@ namespace ModbusApp.Services.Channel;
 
 public static class ModbusChannelFactory
 {
+    private static readonly (string Name, string Ip, int Port)[] TcpConfigs =
+    [
+        ("测试设备通讯卡", "192.168.1.100", 9000),
+        ("继电器检测板卡", "192.168.1.101", 502),
+        ("膨胀阀检测板卡", "192.168.1.102", 502),
+        ("电压板检测板卡", "192.168.1.103", 502),
+        ("电阻板检测板卡", "192.168.1.104", 502),
+        ("数字量输入板卡", "192.168.1.105", 502),
+        ("数字量输出板卡", "192.168.1.106", 502)
+    ];
+    
     public static async Task<IReadOnlyList<IModbusChannel>> CreateChannelsAsync()
     {
-        var channels = new List<IModbusChannel>();
+        var tcpTasks = TcpConfigs.Select(async config =>
+        {
+            var client = new TcpClient();
 
-        var tcpTask1 = Task.Run(async () =>
-        {
-            var client = new TcpClient();
-            await client.ConnectAsync("192.168.1.105", 502);
-            channels.Add(new ModbusTcpChannel("数字量输入板", client));
-        });
-        
-        var tcpTask2 = Task.Run(async () =>
-        {
-            var client = new TcpClient();
-            await client.ConnectAsync("192.168.1.151", 502);
-            channels.Add(new ModbusTcpChannel("数字量输出板", client));
+            await client.ConnectAsync(config.Ip, config.Port);
+
+            return (IModbusChannel)new ModbusTcpChannel(config.Name, client);
         });
 
         var rtuTask = Task.Run(() =>
         {
-            var sp = new SerialPort("COM2", 19200);
+            var sp = new SerialPort("COM2", 19200, Parity.None, 8, StopBits.One);
             sp.Open();
-            channels.Add(new ModbusRtuChannel("COM2", sp));
+            
+            return (IModbusChannel)new ModbusRtuChannel("COM2", sp);
         });
+
+        var channels = await Task.WhenAll(tcpTasks.Append(rtuTask));
 
         foreach (var c in channels)
         {
             Log.Information($"名称:{c.Name} | 类型:{c.Type}");
         }
         
-        await Task.WhenAll(tcpTask1, tcpTask2, rtuTask);
         return channels.AsReadOnly();
     }
 }
