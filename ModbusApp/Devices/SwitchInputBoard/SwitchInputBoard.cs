@@ -37,7 +37,7 @@ public class SwitchInputBoard(IEnumerable<IModbusChannel> channels)
     private ushort Get(int index)
         => index >= 0 && index < _inputs.Length ? _inputs[index] : (ushort)0;
     
-    public async Task RefreshAsync()
+    public async Task ReadStateAsync()
     {
         var inputBoard = channels.First(c => c.Name == "数字量输入板").Master;
         _inputs = await inputBoard.ReadHoldingRegistersAsync(1, 0, 16);

@@ -47,7 +47,7 @@ internal abstract class Program
 
         while (true)
         {
-            await inputBoard.RefreshAsync();
+            await inputBoard.ReadStateAsync();
             var b = await outputBoard.ReadHoldingRegistersAsync(1, 0,10);
             var c = await sp2.ReadHoldingRegistersAsync(1, 0,10);
             var d = await sp2.ReadHoldingRegistersAsync(2, 0,10);
