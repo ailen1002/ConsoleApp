@@ -1,7 +1,6 @@
 // See https://aka.ms/new-console-template for more information
 
-using ModbusApp.Devices.AcInputBoard;
-using ModbusApp.Devices.SwitchInputBoard;
+using ModbusApp.Devices.InputBoard;
 using ModbusApp.Services.Channel;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
@@ -35,8 +34,8 @@ internal abstract class Program
             return;
         }
 
-        var switchInputBoard = new SwitchInputBoard(channels);
-        var acInputClient = new AcInputBoard(channels);
+        var switchInputBoard = new InputBoard(channels, "数字量输入板卡");
+        var acInputClient = new InputBoard(channels, "继电器检测板卡");
         //var outputBoard = channels.First(c => c.Name == "数字量输出板卡").Master;
         //var sp2 = channels.First(c => c.Name == "COM2").Master;
 

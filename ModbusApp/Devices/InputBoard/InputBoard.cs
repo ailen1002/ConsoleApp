@@ -11,37 +11,22 @@
 using ModbusApp.Services.Channel;
 using Serilog;
 
-namespace ModbusApp.Devices.SwitchInputBoard;
+namespace ModbusApp.Devices.InputBoard;
 
-public class SwitchInputBoard(IEnumerable<IModbusChannel> channels)
+public class InputBoard(IEnumerable<IModbusChannel> channels, string channelName)
 {
-    public ushort Di1 => Get(0);
-    public ushort Di2 => Get(1);
-    public ushort Di3 => Get(2);
-    public ushort Di4 => Get(3);
-    public ushort Di5 => Get(4);
-    public ushort Di6 => Get(5);
-    public ushort Di7 => Get(6);
-    public ushort Di8 => Get(7);
-    public ushort Di9 => Get(8);
-    public ushort Di10 => Get(9);
-    public ushort Di11 => Get(10);
-    public ushort Di12 => Get(11);
-    public ushort Di13 => Get(12);
-    public ushort Di14 => Get(13);
-    public ushort Di15 => Get(14);
-    public ushort Di16 => Get(15);
-    
     private ushort[] _inputs = [];
+    
+    public ushort this[int index] => Get(index);
     
     private ushort Get(int index)
         => index >= 0 && index < _inputs.Length ? _inputs[index] : (ushort)0;
     
     public async Task ReadStateAsync()
     {
-        var switchInputBoard = channels.First(c => c.Name == "数字量输入板卡").Master;
+        var switchInputBoard = channels.First(c => c.Name == channelName).Master;
         _inputs = await switchInputBoard.ReadHoldingRegistersAsync(1, 0, 16);
         
-        Log.Debug("数字量输入板卡: {@Values}", _inputs);
+        Log.Debug("{BoardName}: {@Values}",channelName, _inputs);
     }
 }
