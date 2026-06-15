@@ -13,7 +13,7 @@ using Modbus.Device;
 
 namespace ModbusApp.Services.Channel;
 
-public class ModbusRtuChannel(string name, SerialPort serialPort) : IModbusChannel
+public sealed class ModbusRtuChannel(string name, SerialPort serialPort) : IModbusChannel
 {
     public string Name { get; } = name;
     public string Type => "RTU";
