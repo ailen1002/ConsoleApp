@@ -2,6 +2,7 @@
 
 using ModbusApp.Devices.InputBoard;
 using ModbusApp.Devices.OutputBoard;
+using ModbusApp.Devices.ResBoard;
 using ModbusApp.Services.Channel;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
@@ -39,31 +40,24 @@ internal abstract class Program
         var acInputBoard = new InputBoard(channels, "继电器检测板卡");
         var dcInputBoard = new InputBoard(channels, "膨胀阀检测板卡");
         var outputBoard = new OutputBoard(channels, "数字量输出板卡");
-        //var outputBoard = channels.First(c => c.Name == "数字量输出板卡").Master;
-        //var sp2 = channels.First(c => c.Name == "COM2").Master;
+        var resBoard = new ResBoard(channels, "电阻板检测板卡");
 
         while (true)
         {
-            await switchInputBoard.ReadStateAsync();
+            var task1 = switchInputBoard.ReadStateAsync();
+            var task2 = switchInputBoard.ReadStateAsync();
+            await Task.WhenAll(task1, task2);
+            
             await acInputBoard.ReadStateAsync();
             await dcInputBoard.ReadStateAsync();
-            var a = switchInputBoard[1];
+            var a = switchInputBoard[11];
             await outputBoard.ApSwitch.On();
 
             await Task.Delay(1000);
             
             await outputBoard.ApSwitch.Off();
-            //var b = await outputBoard.ReadHoldingRegistersAsync(1, 0,10);
-            //var c = await sp2.ReadHoldingRegistersAsync(1, 0,10);
-            //var d = await sp2.ReadHoldingRegistersAsync(2, 0,10);
-            
-            //Log.Information("b: [{Values}]", string.Join(", ", b));
-            //Log.Information("c: [{Values}]", string.Join(", ", c));
-            //Log.Information("d: [{Values}]", string.Join(", ", d));
+
             Log.Information("a: {@Values}", a);
-            // Log.Information("b: {@Values}", b);
-            // Log.Information("c: {@Values}", c);
-            // Log.Information("d: {@Values}", d);
             
             await Task.Delay(1000);
         }
