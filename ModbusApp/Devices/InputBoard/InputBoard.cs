@@ -17,7 +17,7 @@ namespace ModbusApp.Devices.InputBoard;
 public class InputBoard(IEnumerable<IModbusChannel> channels, string channelName)
 {
     private readonly IModbusMaster _master = channels.First(c => c.Name == channelName).Master;
-    
+    private readonly SemaphoreSlim _lock = new(1, 1);
     private ushort[] _inputs = [];
     
     public ushort this[int index] => Get(index);
@@ -27,8 +27,16 @@ public class InputBoard(IEnumerable<IModbusChannel> channels, string channelName
     
     public async Task ReadStateAsync()
     {
-        _inputs = await _master.ReadHoldingRegistersAsync(1, 0, 16);
-        
+        await _lock.WaitAsync();
+
+        try
+        {
+            _inputs = await _master.ReadHoldingRegistersAsync(1, 0, 16); 
+        }
+        finally
+        {
+            _lock.Release();
+        }
         Log.Debug("{BoardName}: {@Values}",channelName, _inputs);
     }
 }
