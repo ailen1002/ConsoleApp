@@ -18,7 +18,6 @@ public static class ModbusChannelFactory
 {
     private static readonly (string Name, string Ip, int Port)[] TcpConfigs =
     [
-        ("测试设备通讯卡", "192.168.1.100", 9000),
         ("继电器检测板卡", "192.168.1.101", 502),
         ("膨胀阀检测板卡", "192.168.1.102", 502),
         ("电压板检测板卡", "192.168.1.103", 502),
@@ -40,7 +39,7 @@ public static class ModbusChannelFactory
 
         var rtuTask = Task.Run(() =>
         {
-            var sp = new SerialPort("COM2", 19200, Parity.None, 8, StopBits.One);
+            var sp = new SerialPort("COM2", 9600, Parity.None, 8, StopBits.One);
             sp.Open();
             
             return (IModbusChannel)new ModbusRtuChannel("COM2", sp);
