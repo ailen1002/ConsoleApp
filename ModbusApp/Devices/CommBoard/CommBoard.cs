@@ -28,7 +28,7 @@ public class CommBoard
         _stream = _client.GetStream();
     }
     
-    public async Task<CommandResult> SetTxCommand(byte[] data, int expectedLength, string commandName = "")
+    public async Task<CommandResult> SetTxCommand(string data , int expectedLength, string commandName = "")
     {
         await _lock.WaitAsync();
         try
@@ -39,12 +39,12 @@ public class CommBoard
             await ClearBufferAsync();
 #if DEBUG
             Console.WriteLine();
-            Console.WriteLine($"[{commandName}] TX:");
-            PrintHex(data);
+            Console.WriteLine($"[{commandName}] TX: {data}");
 #endif
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+            var command = BuildCommandWithChecksum(data);
 
-            await _stream.WriteAsync(data, cts.Token);
+            await _stream.WriteAsync(command, cts.Token);
             await _stream.FlushAsync(cts.Token);
 
             var response = await ReadExactAsync(expectedLength, cts.Token);
@@ -107,6 +107,29 @@ public class CommBoard
             if (await _stream.ReadAsync(buffer) == 0)
                 break;
         }
+    }
+    
+    private static byte[] BuildCommandWithChecksum(string hexString)
+    {
+        // 1. 去除空格，并按逗号分割
+        var byteStrings = hexString
+            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(s => s.Trim().Replace("0x", "", StringComparison.OrdinalIgnoreCase));
+
+        // 2. 转换为 byte 数组
+        var command = byteStrings
+            .Select(s => Convert.ToByte(s, 16))
+            .ToArray();
+
+        // 3. 计算异或校验
+        var checksum = command.Aggregate<byte, byte>(0x00, (current, b) => (byte)(current ^ b));
+
+        // 4. 生成完整命令
+        var fullCommand = new byte[command.Length + 1];
+        Array.Copy(command, fullCommand, command.Length);
+        fullCommand[^1] = checksum;
+
+        return fullCommand;
     }
     
     private async Task<byte[]> ReadExactAsync(
