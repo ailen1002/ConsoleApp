@@ -12,7 +12,7 @@ using Modbus.Device;
 using ModbusApp.Services.Channel;
 using Serilog;
 
-namespace ModbusApp.Devices.VoltageBoard;
+namespace ModbusApp.Devices;
 
 public class VoltageBoard(IEnumerable<IModbusChannel> channels, string channelName)
 {

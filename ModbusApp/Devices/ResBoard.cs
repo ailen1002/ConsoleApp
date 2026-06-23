@@ -11,7 +11,7 @@
 using Modbus.Device;
 using ModbusApp.Services.Channel;
 
-namespace ModbusApp.Devices.ResBoard;
+namespace ModbusApp.Devices;
 
 public class ResBoard(IEnumerable<IModbusChannel> channels, string channelName)
 {

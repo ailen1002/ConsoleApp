@@ -12,7 +12,7 @@ using Modbus.Device;
 using ModbusApp.Services.Channel;
 using Serilog;
 
-namespace ModbusApp.Devices.InputBoard;
+namespace ModbusApp.Devices;
 
 public class InputBoard(IEnumerable<IModbusChannel> channels, string channelName)
 {

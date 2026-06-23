@@ -11,7 +11,7 @@
 using Modbus.Device;
 using ModbusApp.Services.Channel;
 
-namespace ModbusApp.Devices.OutputBoard;
+namespace ModbusApp.Devices;
 
 public class OutputBoard
 {

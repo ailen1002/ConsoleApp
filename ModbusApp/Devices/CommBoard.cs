@@ -12,7 +12,7 @@ using System.Net.Sockets;
 using ModbusApp.Models;
 using ModbusApp.Services.Channel;
 
-namespace ModbusApp.Devices.CommBoard;
+namespace ModbusApp.Devices;
 
 public class CommBoard
 {

@@ -8,7 +8,7 @@
 //  * ================================================================================
 //  */
 
-namespace ModbusApp.Devices.OutputBoard;
+namespace ModbusApp.Devices;
 
 public sealed class OutputPoint(Func<ushort, ushort, Task> writer, ushort address)
 {

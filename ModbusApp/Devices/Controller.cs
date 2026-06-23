@@ -9,10 +9,9 @@
 //  */
 
 using Modbus.Device;
-using ModbusApp.Devices.OutputBoard;
 using Serilog;
 
-namespace ModbusApp.Devices.Controller;
+namespace ModbusApp.Devices;
 
 public class Controller
 {
