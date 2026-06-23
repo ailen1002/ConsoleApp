@@ -16,6 +16,8 @@
 
     <ItemGroup>
       <Folder Include="Config\" />
+      <Folder Include="Devices\Ammeter\" />
+      <Folder Include="Devices\Voltmeter\" />
       <Folder Include="Interface\" />
       <Folder Include="Modbus\" />
     </ItemGroup>
