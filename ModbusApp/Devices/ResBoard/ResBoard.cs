@@ -18,8 +18,7 @@ public class ResBoard(IEnumerable<IModbusChannel> channels, string channelName)
     private readonly IModbusMaster _master = channels.First(c => c.Name == channelName).Master;
     private const byte SlaveId = 1;
     private const ushort StartAddress = 0;
-    private const int ChannelCount = 16;
-
+    private const int Quantity = 16;
     
     public Task OpenAll()
         => WriteAll(1);
@@ -33,24 +32,22 @@ public class ResBoard(IEnumerable<IModbusChannel> channels, string channelName)
     public Task CloseEvenChannels()
         => WritePattern(i => i % 2 == 1);
     
-    private Task WriteAll(ushort value)
+    private async Task WriteAll(ushort value)
     {
-        var values = Enumerable
-            .Repeat(value, ChannelCount)
-            .ToArray();
-
-        return _master.WriteMultipleRegistersAsync(SlaveId, StartAddress, values);
+        for (var i = 0; i < Quantity; i++)
+        {
+            await Task.Delay(500);
+            await _master.WriteSingleRegisterAsync(SlaveId, (ushort)(StartAddress + i), value);
+        }
     }
     
-    private Task WritePattern(Func<int, bool> selector)
+    private async Task WritePattern(Func<int, bool> selector)
     {
-        var values = new ushort[ChannelCount];
-
-        for (var i = 0; i < ChannelCount; i++)
+        for (var i = 0; i < Quantity; i++)
         {
-            values[i] = selector(i) ? (ushort)1 : (ushort)0;
+            var value = selector(i) ? (ushort)1 : (ushort)0;
+            await Task.Delay(500);
+            await _master.WriteSingleRegisterAsync(SlaveId, (ushort)(StartAddress + i), value);
         }
-
-        return _master.WriteMultipleRegistersAsync(SlaveId, StartAddress, values);
     }
 }
