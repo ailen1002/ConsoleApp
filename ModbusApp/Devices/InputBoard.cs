@@ -31,12 +31,13 @@ public class InputBoard(IEnumerable<IModbusChannel> channels, string channelName
 
         try
         {
-            _inputs = await _master.ReadHoldingRegistersAsync(1, 0, 16); 
+            _inputs = await _master.ReadHoldingRegistersAsync(1, 0, 16);
+            
+            Log.Debug("{BoardName}: {@Values}",channelName, _inputs);
         }
         finally
         {
             _lock.Release();
         }
-        Log.Debug("{BoardName}: {@Values}",channelName, _inputs);
     }
 }

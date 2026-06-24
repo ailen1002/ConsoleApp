@@ -18,7 +18,7 @@ public class Controller
     private readonly IModbusMaster _master;
     private readonly SemaphoreSlim _lock = new(1, 1);
     private readonly string _channelName;
-    private byte _slaveId;
+    private readonly byte _slaveId;
     private volatile ushort[] _inputs = [];
     
     public OutputPoint Forward { get; }

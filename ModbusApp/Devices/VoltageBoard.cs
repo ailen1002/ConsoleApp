@@ -19,14 +19,14 @@ public class VoltageBoard(IEnumerable<IModbusChannel> channels, string channelNa
     private readonly IModbusMaster _master = channels.First(c => c.Name == channelName).Master;
     private readonly SemaphoreSlim _lock = new(1, 1);
     private const int ChannelCount = 16;
-    private readonly float[] _voltages = new float[ChannelCount];
+    private readonly double[] _voltages = new double[ChannelCount];
     private const byte SlaveId = 1;
     private const ushort StartAddress = 48;
     private const ushort Quantity = 16;
     
-    public float this[int index] => Get(index);
+    public double this[int index] => Get(index);
     
-    private float Get(int index)
+    private double Get(int index)
         => index >= 0 && index < _voltages.Length ? _voltages[index] : 0.0f;
     
     public async Task ReadStateAsync()
@@ -39,14 +39,14 @@ public class VoltageBoard(IEnumerable<IModbusChannel> channels, string channelNa
             
             for (var i = 0; i < response.Length; i++)
             {
-                _voltages[i] = (float)Math.Round(response[i] / 10.0f, 1);
+                _voltages[i] = Math.Round(response[i] / 10.0f, 1);
             }
+            
+            Log.Debug("{BoardName}: {@Values}", channelName, _voltages);
         }
         finally
         {
             _lock.Release();
         }
-        
-        Log.Debug("{BoardName}: {@Values}", channelName, _voltages);
     }
 }

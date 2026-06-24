@@ -27,4 +27,14 @@ public class DeviceNames
     public const string CommPort = "COM2";
 
     public const string CommCard = "测试设备通讯卡";
+    
+    public const string Controller = "主控制器";
+    
+    public const string AcVoltmeter = "交流电压表";
+    
+    public const string DcVoltmeter = "直流电压表";
+    
+    public const string Fan1Ammeter = "Fan1电流表";
+    
+    public const string Fan2Ammeter = "Fan2电流表";
 }

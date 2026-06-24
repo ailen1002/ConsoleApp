@@ -10,11 +10,14 @@
 
 using Modbus.Device;
 using ModbusApp.Services.Channel;
+using Serilog;
 
 namespace ModbusApp.Devices;
 
 public class OutputBoard
 {
+    private readonly SemaphoreSlim _lock = new(1, 1);
+    private readonly string _channelName;
     private readonly IModbusMaster _master;
     public OutputPoint ApSwitch { get; }
     public OutputPoint TestSwitch { get; }
@@ -36,6 +39,7 @@ public class OutputBoard
     public OutputBoard(IEnumerable<IModbusChannel> channels, string channelName)
     {
         _master = channels.First(c => c.Name == channelName).Master;
+        _channelName = channelName;
 
         ApSwitch = new OutputPoint(WriteAsync, 0);
         TestSwitch = new OutputPoint(WriteAsync, 1);
@@ -55,8 +59,24 @@ public class OutputBoard
         AcVoltageDetectionSwitch = new OutputPoint(WriteAsync, 15);
     }
     
-    private Task WriteAsync(ushort address, ushort value)
+    private async Task WriteAsync(ushort registerAddress, ushort value)
     {
-        return _master.WriteSingleRegisterAsync(1, address, value);
+        await _lock.WaitAsync();
+
+        try
+        {
+            await _master.WriteSingleRegisterAsync(1, registerAddress, value);
+            
+            Log.Debug("{BoardName} 写入 Addr={Address}, Value={Value}", _channelName, registerAddress, value);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "{BoardName} 写入失败 Addr={Address}, Value={Value}", _channelName,registerAddress,value);
+            throw;
+        }
+        finally
+        {
+            _lock.Release();
+        }
     }
 }

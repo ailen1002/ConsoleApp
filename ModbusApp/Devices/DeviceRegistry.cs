@@ -29,6 +29,14 @@ public class DeviceRegistry
     public CommBoard CommBoard { get; }
 
     public Controller Controller { get; }
+    
+    public Voltmeter AcVoltmeter { get; }
+    
+    public Voltmeter DcVoltmeter { get; }
+    
+    public Ammeter Fan1Ammeter { get; }
+    
+    public Ammeter Fan2Ammeter { get; }
 
     private DeviceRegistry(
         InputBoard switchInputBoard,
@@ -38,7 +46,11 @@ public class DeviceRegistry
         ResBoard resBoard,
         VoltageBoard voltageBoard,
         CommBoard commBoard,
-        Controller controller)
+        Controller controller,
+        Voltmeter acVoltmeter,
+        Voltmeter dcVoltmeter,
+        Ammeter fan1Ammeter,
+        Ammeter fan2Ammeter)
     {
         SwitchInputBoard = switchInputBoard;
         AcInputBoard = acInputBoard;
@@ -48,6 +60,10 @@ public class DeviceRegistry
         VoltageBoard = voltageBoard;
         CommBoard = commBoard;
         Controller = controller;
+        AcVoltmeter = acVoltmeter;
+        DcVoltmeter = dcVoltmeter;
+        Fan1Ammeter = fan1Ammeter;
+        Fan2Ammeter = fan2Ammeter;
     }
 
     public static async Task<DeviceRegistry> CreateAsync()
@@ -61,6 +77,8 @@ public class DeviceRegistry
         var registry = new ChannelRegistry(
             modbusChannels,
             tcpChannels);
+        
+        var channel = registry.GetMaster(DeviceNames.CommPort);
 
         return new DeviceRegistry(
             new InputBoard(
@@ -90,10 +108,11 @@ public class DeviceRegistry
             new CommBoard(
                 tcpChannels,
                 DeviceNames.CommCard),
-
-            new Controller(
-                registry.GetMaster(DeviceNames.CommPort),
-                "主控制器",1)
+            new Controller(channel, DeviceNames.Controller,1),
+            new Voltmeter(channel, DeviceNames.AcVoltmeter,2),
+            new Voltmeter(channel, DeviceNames.DcVoltmeter,3),
+            new Ammeter(channel, DeviceNames.Fan1Ammeter,4),
+            new Ammeter(channel, DeviceNames.Fan2Ammeter,5)
         );
     }
 }
