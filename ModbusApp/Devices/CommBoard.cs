@@ -11,6 +11,7 @@
 using System.Net.Sockets;
 using ModbusApp.Models;
 using ModbusApp.Services.Channel;
+using Serilog;
 
 namespace ModbusApp.Devices;
 
@@ -42,7 +43,6 @@ public class CommBoard
             var command = BuildCommandWithChecksum(data);
             
 #if DEBUG
-            Console.WriteLine();
             PrintHex(command, commandName);
 #endif
             
@@ -52,11 +52,9 @@ public class CommBoard
             var response = await ReadExactAsync(expectedLength, cts.Token);
             var success = VerifyChecksum(response);
 #if DEBUG
-            Console.WriteLine();
             PrintHex(response, commandName);
 
-            Console.WriteLine(
-                $"[{commandName}] Checksum = {(success ? "OK" : "NG")}");
+            Log.Debug($"[{commandName}] Res: Checksum = {(success ? "OK" : "NG")}");
 #endif
             return new CommandResult
             {
@@ -69,7 +67,7 @@ public class CommBoard
         catch(OperationCanceledException)
         {
 #if DEBUG
-            Console.WriteLine($"[{commandName}] Timeout");
+            Log.Debug($"[{commandName}] Res: Timeout");
 #endif
             return new CommandResult
             {
@@ -82,8 +80,7 @@ public class CommBoard
         catch (Exception ex)
         {
 #if DEBUG
-            Console.WriteLine(
-                $"[{commandName}] Exception: {ex.Message}");
+            Log.Debug($"[{commandName}] Res: Exception: {ex.Message}");
 #endif
 
             return new CommandResult
@@ -188,7 +185,7 @@ public class CommBoard
             var line = string.Join(", ", data.Skip(i)
                     .Take(length)
                     .Select(b => $"0x{b:X2}"));
-            Console.WriteLine($"[{commandName}] RX: {line}");
+            Log.Debug($"[{commandName}] RX: {line}");
         }
     }
 #endif

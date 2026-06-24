@@ -49,7 +49,7 @@ public static class ModbusChannelFactory
 
         foreach (var c in channels)
         {
-            Log.Information($"名称:{c.Name} | 类型:{c.Type}");
+            Log.Information($"名称: {c.Name} | 类型: {c.Type}");
         }
         
         return channels.AsReadOnly();

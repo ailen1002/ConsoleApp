@@ -48,7 +48,7 @@ public class ResBoard(IEnumerable<IModbusChannel> channels, string channelName)
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "{BoardName} WriteAll写入失败", channelName);
+            Log.Error(ex, "{BoardName}: WriteAll写入失败", channelName);
             throw;
         }
         finally
@@ -71,7 +71,7 @@ public class ResBoard(IEnumerable<IModbusChannel> channels, string channelName)
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "{BoardName} WritePattern写入失败", channelName);
+            Log.Error(ex, "{BoardName}: WritePattern写入失败", channelName);
             throw;
         }
         finally

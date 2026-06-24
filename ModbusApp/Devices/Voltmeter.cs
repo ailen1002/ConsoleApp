@@ -32,7 +32,7 @@ public class Voltmeter(IModbusMaster channel, string channelName, byte slaveId)
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "{BoardName} 读取状态失败", channelName);
+            Log.Error(ex, "{BoardName}: 读取状态失败", channelName);
 
             throw;
         }

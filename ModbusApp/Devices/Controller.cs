@@ -63,7 +63,7 @@ public class Controller
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "{BoardName} 读取状态失败", _channelName);
+            Log.Error(ex, "{BoardName}: 读取状态失败", _channelName);
             throw;
         }
         finally
@@ -85,11 +85,11 @@ public class Controller
                 _inputs[registerAddress] = value;
             }
             
-            Log.Debug("{BoardName} 写入 Addr={Address}, Value={Value}", _channelName, registerAddress, value);
+            Log.Debug("{BoardName}: 写入 Addr={Address}, Value={Value}", _channelName, registerAddress, value);
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "{BoardName} 写入失败 Addr={Address}, Value={Value}", _channelName,registerAddress,value);
+            Log.Error(ex, "{BoardName}: 写入失败 Addr={Address}, Value={Value}", _channelName,registerAddress,value);
             throw;
         }
         finally

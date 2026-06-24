@@ -67,11 +67,11 @@ public class OutputBoard
         {
             await _master.WriteSingleRegisterAsync(1, registerAddress, value);
             
-            Log.Debug("{BoardName} 写入 Addr={Address}, Value={Value}", _channelName, registerAddress, value);
+            Log.Debug("{BoardName}: 写入 Addr={Address}, Value={Value}", _channelName, registerAddress, value);
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "{BoardName} 写入失败 Addr={Address}, Value={Value}", _channelName,registerAddress,value);
+            Log.Error(ex, "{BoardName}: 写入失败 Addr={Address}, Value={Value}", _channelName,registerAddress,value);
             throw;
         }
         finally
