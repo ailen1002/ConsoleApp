@@ -37,24 +37,26 @@ public class CommBoard
                 throw new InvalidOperationException("TCP连接已断开");
 
             await ClearBufferAsync();
-#if DEBUG
-            Console.WriteLine();
-            Console.WriteLine($"[{commandName}] TX: {data}");
-#endif
+
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
             var command = BuildCommandWithChecksum(data);
-
+            
+#if DEBUG
+            Console.WriteLine();
+            PrintHex(command, commandName);
+#endif
+            
             await _stream.WriteAsync(command, cts.Token);
             await _stream.FlushAsync(cts.Token);
 
             var response = await ReadExactAsync(expectedLength, cts.Token);
             var success = VerifyChecksum(response);
 #if DEBUG
-            Console.WriteLine($"[{commandName}] RX:");
-            PrintHex(response);
+            Console.WriteLine();
+            PrintHex(response, commandName);
 
             Console.WriteLine(
-                $"Checksum={(success ? "OK" : "NG")}");
+                $"[{commandName}] Checksum = {(success ? "OK" : "NG")}");
 #endif
             return new CommandResult
             {
@@ -177,21 +179,16 @@ public class CommBoard
     }
 
 #if DEBUG
-    private static void PrintHex(
-        byte[] data,
-        int bytesPerLine = 16)
+    private static void PrintHex(byte[] data, string commandName)
     {
+        const int bytesPerLine = 16;
         for (var i = 0; i < data.Length; i += bytesPerLine)
         {
-            var length = Math.Min(
-                bytesPerLine,
-                data.Length - i);
-
-            Console.WriteLine(
-                BitConverter.ToString(
-                    data,
-                    i,
-                    length));
+            var length = Math.Min(bytesPerLine, data.Length - i);
+            var line = string.Join(", ", data.Skip(i)
+                    .Take(length)
+                    .Select(b => $"0x{b:X2}"));
+            Console.WriteLine($"[{commandName}] RX: {line}");
         }
     }
 #endif
