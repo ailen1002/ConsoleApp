@@ -93,7 +93,7 @@ public class DeviceRegistry
 
             new Controller(
                 registry.GetMaster(DeviceNames.CommPort),
-                "主控制器")
+                "主控制器",1)
         );
     }
 }

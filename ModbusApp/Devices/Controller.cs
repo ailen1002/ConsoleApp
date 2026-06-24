@@ -18,7 +18,7 @@ public class Controller
     private readonly IModbusMaster _master;
     private readonly SemaphoreSlim _lock = new(1, 1);
     private readonly string _channelName;
-    private const byte SlaveId = 1;
+    private byte _slaveId;
     private volatile ushort[] _inputs = [];
     
     public OutputPoint Forward { get; }
@@ -35,11 +35,12 @@ public class Controller
     private ushort Get(int index)
         => index >= 0 && index < _inputs.Length ? _inputs[index] : (ushort)0;
     
-    public Controller(IModbusMaster channel, string channelName)
+    public Controller(IModbusMaster channel, string channelName, byte slaveId)
     {
         _master = channel;
         _channelName = channelName;
-
+        _slaveId = slaveId;
+        
         Forward = new OutputPoint(WriteAsync, 0);
         Reverse = new OutputPoint(WriteAsync, 1);
         VoltageSwitch = new OutputPoint(WriteAsync, 2);
@@ -56,7 +57,7 @@ public class Controller
 
         try
         {
-            _inputs = await _master.ReadHoldingRegistersAsync(SlaveId, 0, 2);
+            _inputs = await _master.ReadHoldingRegistersAsync(_slaveId, 0, 2);
             
             Log.Debug("{BoardName}: {@Values}",_channelName, _inputs);
         }
@@ -78,7 +79,7 @@ public class Controller
         
         try
         {
-            await _master.WriteSingleRegisterAsync(SlaveId, registerAddress, value);
+            await _master.WriteSingleRegisterAsync(_slaveId, registerAddress, value);
             
             if (registerAddress < _inputs.Length)
             {
