@@ -14,57 +14,11 @@ namespace ModbusApp.Devices;
 
 public class DeviceRegistry
 {
-    public InputBoard SwitchInputBoard { get; }
+    public required IoDevices Io { get; init; }
 
-    public InputBoard AcInputBoard { get; }
+    public required CommDevices Comm { get; init; }
 
-    public InputBoard DcInputBoard { get; }
-
-    public OutputBoard OutputBoard { get; }
-
-    public ResBoard ResBoard { get; }
-
-    public VoltageBoard VoltageBoard { get; }
-
-    public CommBoard CommBoard { get; }
-
-    public Controller Controller { get; }
-    
-    public Voltmeter AcVoltmeter { get; }
-    
-    public Voltmeter DcVoltmeter { get; }
-    
-    public Ammeter Fan1Ammeter { get; }
-    
-    public Ammeter Fan2Ammeter { get; }
-
-    private DeviceRegistry(
-        InputBoard switchInputBoard,
-        InputBoard acInputBoard,
-        InputBoard dcInputBoard,
-        OutputBoard outputBoard,
-        ResBoard resBoard,
-        VoltageBoard voltageBoard,
-        CommBoard commBoard,
-        Controller controller,
-        Voltmeter acVoltmeter,
-        Voltmeter dcVoltmeter,
-        Ammeter fan1Ammeter,
-        Ammeter fan2Ammeter)
-    {
-        SwitchInputBoard = switchInputBoard;
-        AcInputBoard = acInputBoard;
-        DcInputBoard = dcInputBoard;
-        OutputBoard = outputBoard;
-        ResBoard = resBoard;
-        VoltageBoard = voltageBoard;
-        CommBoard = commBoard;
-        Controller = controller;
-        AcVoltmeter = acVoltmeter;
-        DcVoltmeter = dcVoltmeter;
-        Fan1Ammeter = fan1Ammeter;
-        Fan2Ammeter = fan2Ammeter;
-    }
+    public required ComDevices Com { get; init; }
 
     public static async Task<DeviceRegistry> CreateAsync()
     {
@@ -78,41 +32,40 @@ public class DeviceRegistry
             modbusChannels,
             tcpChannels);
         
-        var channel = registry.GetMaster(DeviceNames.CommPort);
+        var com2 = registry.GetMaster(DeviceNames.CommPort);
 
-        return new DeviceRegistry(
-            new InputBoard(
-                modbusChannels,
-                DeviceNames.SwitchInputBoard),
+        return new DeviceRegistry
+        {
+            Io = new IoDevices
+            {
+                SwitchInputBoard = new InputBoard(modbusChannels, DeviceNames.SwitchInputBoard),
 
-            new InputBoard(
-                modbusChannels,
-                DeviceNames.AcInputBoard),
+                AcInputBoard = new InputBoard(modbusChannels, DeviceNames.AcInputBoard),
 
-            new InputBoard(
-                modbusChannels,
-                DeviceNames.DcInputBoard),
+                DcInputBoard = new InputBoard(modbusChannels, DeviceNames.DcInputBoard),
 
-            new OutputBoard(
-                modbusChannels,
-                DeviceNames.OutputBoard),
+                OutputBoard = new OutputBoard(modbusChannels, DeviceNames.OutputBoard),
 
-            new ResBoard(
-                modbusChannels,
-                DeviceNames.ResBoard),
+                ResBoard = new ResBoard(modbusChannels, DeviceNames.ResBoard),
 
-            new VoltageBoard(
-                modbusChannels,
-                DeviceNames.VoltageBoard),
+                VoltageBoard = new VoltageBoard(modbusChannels, DeviceNames.VoltageBoard)
+            },
+            Comm = new CommDevices
+            {
+                CommBoard = new CommBoard(tcpChannels, DeviceNames.CommCard)
+            },
+            Com = new ComDevices
+            {
+                Controller = new Controller(com2, DeviceNames.Controller, 1),
 
-            new CommBoard(
-                tcpChannels,
-                DeviceNames.CommCard),
-            new Controller(channel, DeviceNames.Controller,1),
-            new Voltmeter(channel, DeviceNames.AcVoltmeter,2),
-            new Voltmeter(channel, DeviceNames.DcVoltmeter,3),
-            new Ammeter(channel, DeviceNames.Fan1Ammeter,4),
-            new Ammeter(channel, DeviceNames.Fan2Ammeter,5)
-        );
+                AcVoltmeter = new Voltmeter(com2, DeviceNames.AcVoltmeter, 2),
+
+                DcVoltmeter = new Voltmeter(com2, DeviceNames.DcVoltmeter, 3),
+
+                Fan1Ammeter = new Ammeter(com2, DeviceNames.Fan1Ammeter, 4),
+
+                Fan2Ammeter = new Ammeter(com2, DeviceNames.Fan2Ammeter, 5)
+            }
+        };
     }
 }

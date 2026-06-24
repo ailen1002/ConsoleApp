@@ -64,7 +64,6 @@ public class Controller
         catch (Exception ex)
         {
             Log.Error(ex, "{BoardName} 读取状态失败", _channelName);
-
             throw;
         }
         finally
